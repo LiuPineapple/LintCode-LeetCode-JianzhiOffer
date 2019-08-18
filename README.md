@@ -1,2 +1,2 @@
-# LintCode
-Used to practice LintCode
+# LintCode-LeetCode
+Used to practice LintCode and LeetCode
