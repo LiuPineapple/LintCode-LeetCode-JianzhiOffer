@@ -1,2 +1,2 @@
 # LintCode-LeetCode
-Used to practice LintCode and LeetCode
+Use this repository to practice LintCode and LeetCode
