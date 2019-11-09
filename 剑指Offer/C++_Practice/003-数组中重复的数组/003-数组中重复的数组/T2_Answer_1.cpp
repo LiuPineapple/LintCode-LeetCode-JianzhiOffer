@@ -1,7 +1,8 @@
+//在答案代码基础上修改
 //改变了while下的部分语句，结果是一样的
 //缺点是有些值没办法找出来
-//时间复杂度为O(nlogn)
-//空间复杂度为O(1)
+//时间复杂度也为O(nlogn)
+//空间复杂度也为O(1)
 
 #include<iostream>
 using namespace std;
