@@ -1,5 +1,10 @@
 //二分查找适用于排序数组，时间复杂度为O(log(n))
-//改了while的条件，运行结果没有区别
+//要考虑四种特殊情况:
+//-数组长度为0
+//- 数组长度为1
+//- 数组没有旋转
+//- 二分查找的两边和中间相等
+
 #include<exception>
 #include<iostream>
 #include<cstdio>
@@ -8,15 +13,15 @@ using namespace std;
 //顺序查找
 int MinInorder(int * number, int index1, int index2)
 {
-	int length = index2 - index1 + 1;
-	int result = number[0];
-	for (int i = 1; i <= length; i++)
+	int result = number[index1];
+	for (int i = index1+1; i <= index2; i++)
 	{
-		if (result < number[i])
+		if (result > number[i])
 			result = number[i];
 	}
 	return result;
 }
+
 
 //二分查找
 int Min(int * number, int length)
@@ -26,7 +31,7 @@ int Min(int * number, int length)
 	int index1 = 0;
 	int index2 = length - 1;
 	int indexM = index1;
-	while (index2>index1)
+	while (number[index1] >= number[index2])
 	{
 		if (index2 - index1 == 1)
 		{
@@ -36,6 +41,7 @@ int Min(int * number, int length)
 		indexM = (index1 + index2) / 2;
 		if (number[index2] == number[index1] && number[index1] == number[indexM])
 			return MinInorder(number, index1, index2);
+			return 1;
 		if (number[indexM] >= number[index1])
 			index1 = indexM;
 		if (number[indexM] <= number[index2])
