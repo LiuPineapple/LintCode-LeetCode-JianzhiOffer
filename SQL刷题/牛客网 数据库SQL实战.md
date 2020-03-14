@@ -103,7 +103,34 @@ HAVING t>15
 
 注意区分WHERE和HAVING：
 
-https://www.cnblogs.com/ljf-Sky/p/9024683.html
+1. https://www.cnblogs.com/ljf-Sky/p/9024683.html
+2. WHERE是从FROM的表里选，HAVING 是从SELECT后的表里选
+
+## 8 找出所有员工当前薪水salary情况
+
+```sql
+SELECT salary FROM salaries WHERE to_date='9999-01-01' GROUP BY salary ORDER BY salary DESC;
+```
+
+## 9 获取所有部门当前manager的当前薪水情况，给出dept_no, emp_no以及salary，当前表示to_date='9999-01-01'
+
+```sql
+SELECT d.dept_no,d.emp_no,s.salary
+FROM dept_manager d INNER JOIN salaries s
+ON d.emp_no=s.emp_no AND d.to_date = '9999-01-01' AND S.to_date = '9999-01-01';
+```
+
+##### Note
+
+牛客网上的题，凡是涉及到date的，一般都要两个表时间同时成立才行
+
+## 10 获取所有非manager的员工emp_no
+
+```sql
+
+```
+
+
 
 
 
