@@ -127,8 +127,26 @@ ON d.emp_no=s.emp_no AND d.to_date = '9999-01-01' AND S.to_date = '9999-01-01';
 ## 10 获取所有非manager的员工emp_no
 
 ```sql
+SELECT emp_no FROM employees
+WHERE emp_no NOT IN (SELECT emp_no FROM dept_manager);
+```
+
+## 11 获取所有员工当前的manager
+
+```sql
+SELECT e.emp_no,m.emp_no manager_no
+FROM dept_emp e INNER JOIN dept_manager m
+ON e.dept_no = m.dept_no AND e.to_date='9999-01-01' AND m.to_date = '9999-01-01'
+AND e.emp_no <> m.emp_no
+```
+
+## 12 获取所有部门中当前员工薪水最高的相关信息
+
+```sql
 
 ```
+
+
 
 
 
