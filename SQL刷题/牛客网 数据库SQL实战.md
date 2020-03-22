@@ -137,18 +137,45 @@ WHERE emp_no NOT IN (SELECT emp_no FROM dept_manager);
 SELECT e.emp_no,m.emp_no manager_no
 FROM dept_emp e INNER JOIN dept_manager m
 ON e.dept_no = m.dept_no AND e.to_date='9999-01-01' AND m.to_date = '9999-01-01'
-AND e.emp_no <> m.emp_no
+AND e.emp_no <> m.emp_no;
 ```
 
 ## 12 获取所有部门中当前员工薪水最高的相关信息
 
 ```sql
-
+SELECT d.dept_no,d.emp_no,max(s.salary) salary
+FROM dept_emp d INNER JOIN salaries s
+ON d.emp_no = s.emp_no AND d.to_date = '9999-01-01' AND s.to_date = '9999-01-01'
+GROUP BY d.dept_no;
 ```
 
+## 13 从titles表获取按照title进行分组
 
+```sql
+SELECT title,COUNT(*) t FROM titles GROUP BY title HAVING t>=2;
+```
 
+##### Note
 
+子句顺序https://blog.csdn.net/qq_23864697/article/details/80765371
+
+## 14 从titles表获取按照title进行分组，注意对于重复的emp_no进行忽略。
+
+```sql
+SELECT title,COUNT(DISTINCT emp_no) t FROM titles GROUP BY title HAVING t>=2;
+```
+
+## 15 查找employees表
+
+```sql
+SELECT * FROM employees 
+WHERE emp_no % 2 = 1 AND last_name <> 'Mary'
+ORDER BY hire_date DESC;
+```
+
+#### Note
+
+感觉sql支持的算术运算符和python差不多啊
 
 
 
