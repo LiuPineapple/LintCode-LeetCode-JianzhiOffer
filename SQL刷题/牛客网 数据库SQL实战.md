@@ -173,9 +173,36 @@ WHERE emp_no % 2 = 1 AND last_name <> 'Mary'
 ORDER BY hire_date DESC;
 ```
 
-#### Note
+##### Note
 
 感觉sql支持的算术运算符和python差不多啊
+
+## 16 统计出当前各个title类型对应的员工当前薪水对应的平均工资
+
+```sql
+SELECT title,avg(salary) avg FROM titles t INNER JOIN salaries s
+ON t.emp_no = s.emp_no AND t.to_date = '9999-01-01' AND s.to_date = '9999-01-01'
+GROUP BY title;
+```
+
+##### Note
+
+WHERE是从FROM后面的表中筛选（算上JOIN,ON之后的），GROUP BY 是从FROM WHERE选出的表中分组，HAVING是从SELECT...FROM...(JOIN ON)...WHERE...GROUP BY...之后得到的表中筛选，ORDER BY 是在之前所有操作后得到的表中排序，最后再LIMIT OFFSET限制输出
+
+## 17 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary
+
+```sql
+SELECT emp_no,MAX(salary) salary FROM salaries
+WHERE salary<(SELECT MAX(salary) FROM salaries WHERE to_date='9999-01-01') 
+AND to_date='9999-01-01';
+```
+
+下面是参考别人的更具有普适性的做法，可以应对薪水第3多的，第4多的等等
+
+```sql
+select emp_no, salary from salaries where to_date = '9999-01-01' 
+and salary = (select distinct salary from salaries where to_date = '9999-01-01' order by salary desc limit 1,1);
+```
 
 
 
