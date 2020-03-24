@@ -187,7 +187,7 @@ GROUP BY title;
 
 ##### Note
 
-WHERE是从FROM后面的表中筛选（算上JOIN,ON之后的），GROUP BY 是从FROM WHERE选出的表中分组，HAVING是从SELECT...FROM...(JOIN ON)...WHERE...GROUP BY...之后得到的表中筛选，ORDER BY 是在之前所有操作后得到的表中排序，最后再LIMIT OFFSET限制输出
+WHERE是从FROM后面的表中筛选（算上JOIN,ON之后的），GROUP BY 是从FROM WHERE选出的表中分组，HAVING是从SELECT...FROM...(JOIN ON)...WHERE...GROUP BY...之后得到的表中筛选，ORDER BY 是在之前所有操作后得到的表中排序，最后再LIMIT OFFSET限制输出，SELECT是在后面选好的表中找列
 
 ## 17 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary
 
@@ -202,6 +202,42 @@ AND to_date='9999-01-01';
 ```sql
 select emp_no, salary from salaries where to_date = '9999-01-01' 
 and salary = (select distinct salary from salaries where to_date = '9999-01-01' order by salary desc limit 1,1);
+```
+
+## 18 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary，不准使用order by
+
+```sql
+SELECT e.emp_no,MAX(s.salary) salary,e.last_name,e.first_name 
+FROM employees e INNER JOIN salaries s
+ON e.emp_no=s.emp_no AND s.to_date = '9999-01-01'
+WHERE s.salary<(SELECT MAX(s.salary) FROM salaries s WHERE s.to_date='9999-01-01');
+```
+
+## 19  查找所有员工的last_name和first_name以及对应的dept_name
+
+```sql
+SELECT e.last_name,e.first_name,dp.dept_name 
+FROM employees e LEFT OUTER JOIN dept_emp d ON e.emp_no=d.emp_no
+LEFT OUTER JOIN departments dp on d.dept_no = dp.dept_no;
+```
+
+##### Note
+
+使用两次左连接
+
+## 20 查找员工编号emp_no为10001其自入职以来的薪水salary涨幅值growth
+
+```sql
+SELECT MAX(salary)-MIN(salary) growth FROM salaries WHERE emp_no=10001;
+```
+
+上面的做法当最后一次为降薪的时候不成立，的更严谨的做法如下：
+
+```sql
+SELECT ( 
+(SELECT salary FROM salaries WHERE emp_no = 10001 ORDER BY from_date DESC LIMIT 1) -
+(SELECT salary FROM salaries WHERE emp_no = 10001 ORDER BY from_date ASC LIMIT 1)
+) AS growth;
 ```
 
 
