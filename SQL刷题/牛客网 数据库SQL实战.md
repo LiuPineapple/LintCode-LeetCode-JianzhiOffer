@@ -200,8 +200,8 @@ AND to_date='9999-01-01';
 下面是参考别人的更具有普适性的做法，可以应对薪水第3多的，第4多的等等
 
 ```sql
-select emp_no, salary from salaries where to_date = '9999-01-01' 
-and salary = (select distinct salary from salaries where to_date = '9999-01-01' order by salary desc limit 1,1);
+SELECT emp_no,salary FROM salaries WHERE to_date = '9999-01-01' AND salary = 
+(SELECT DISTINCT salary FROM salaries WHERE to_date = '9999-01-01' ORDER BY salary DESC LIMIT 1,1);
 ```
 
 ## 18 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary，不准使用order by
@@ -238,6 +238,78 @@ SELECT (
 (SELECT salary FROM salaries WHERE emp_no = 10001 ORDER BY from_date DESC LIMIT 1) -
 (SELECT salary FROM salaries WHERE emp_no = 10001 ORDER BY from_date ASC LIMIT 1)
 ) AS growth;
+```
+
+## 21 查找所有员工自入职以来的薪水涨幅情况
+
+```sql
+SELECT start.emp_no,current.salary - start.salary growth FROM
+(SELECT e.emp_no,s.salary FROM employees e INNER JOIN salaries s ON e.emp_no = s.emp_no 
+AND e.hire_date = s.from_date) start INNER JOIN
+(SELECT e.emp_no,s.salary FROM employees e INNER JOIN salaries s ON e.emp_no = s.emp_no 
+AND s.tO_date = '9999-01-01') current
+ON start.emp_no = current.emp_no ORDER BY growth;
+```
+
+## 22 统计各个部门的工资记录数
+
+```sql
+SELECT d.dept_no,d.dept_name,count(m.salary) sum FROM departments d INNER JOIN
+(SELECT de.dept_no,de.emp_no,s.salary FROM dept_emp de INNER JOIN salaries s ON de.emp_no = s.emp_no) m 
+ON d.dept_no = m.dept_no GROUP BY d.dept_no;
+```
+
+## 23 对所有员工的薪水按照salary进行按照1-N的排名
+
+```sql
+SELECT emp_no, salaries, DENSE_RANK() OVER(ORDER BY salary DESC) AS rank
+WHERE to_date = '9999-01-01' ORDER BY salary DESC, emp_no ASC;
+```
+
+1. 窗口函数的使用：
+
+   https://www.cnblogs.com/DataArt/p/9961676.html
+
+   注意，窗口函数的分组是在where之后的，因为它还是在SELECT子句当中的
+
+2. 注意，序号的窗口函数是按照排序进行排序号的
+
+3. 但是牛客网并不支持窗口函数，所以上述代码无法通过，要使用以下语句
+
+```sql
+SELECT s1.emp_no, s1.salary, COUNT(DISTINCT s2.salary) AS rank
+FROM salaries AS s1, salaries AS s2
+WHERE s1.to_date = '9999-01-01'  AND s2.to_date = '9999-01-01' AND s1.salary <= s2.salary
+GROUP BY s1.emp_no
+ORDER BY s1.salary DESC, s1.emp_no ASC;
+```
+
+## 24 获取所有非manager员工当前的薪水情况
+
+```sql
+SELECT d.dept_no,d.emp_no,s.salary FROM dept_emp d INNER JOIN salaries s ON d.emp_no = s.emp_no
+WHERE d.to_date = '9999-01-01' AND s.to_date = '9999-01-01' AND d.emp_no NOT IN 
+(SELECT emp_no FROM dept_manager WHERE to_date = '9999-01-01');
+```
+
+## 25 获取员工其当前的薪水比其manager当前薪水还高的相关信息
+
+```sql
+SELECT l1.emp_no,l2.emp_no manager_no,l1.salary emp_salary,l2.salary manager_salary FROM
+(SELECT d.emp_no,d.dept_no,s.salary FROM dept_emp d INNER JOIN salaries s
+ ON d.emp_no  = s.emp_no AND d.to_date ='9999-01-01' AND s.to_date = '9999-01-01') l1,
+(SELECT d.emp_no,d.dept_no,s.salary FROM dept_manager d INNER JOIN salaries s 
+ ON d.emp_no  = s.emp_no AND d.to_date ='9999-01-01' AND s.to_date = '9999-01-01') l2
+WHERE l1.dept_no = l2.dept_no AND l1.salary>l2.salary;
+```
+
+## 26 汇总各个部门当前员工的title类型的分配数目
+
+```sql
+SELECT d.dept_no,d.dept_name,t.title,COUNT(t.title) count
+FROM departments d INNER JOIN dept_emp p  ON d.dept_no = p.dept_no AND p.to_date = '9999-01-01'
+INNER JOIN titles t ON p.emp_no = t.emp_no AND t.to_date = '9999-01-01'
+GROUP BY d.dept_no,t.title;
 ```
 
 
