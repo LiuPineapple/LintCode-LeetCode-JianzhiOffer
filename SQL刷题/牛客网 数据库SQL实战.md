@@ -312,5 +312,28 @@ INNER JOIN titles t ON p.emp_no = t.emp_no AND t.to_date = '9999-01-01'
 GROUP BY d.dept_no,t.title;
 ```
 
+## 27 给出每个员工每年薪水涨幅超过5000的员工编号emp_no
 
+```sql
+SELECT s2.emp_no, s2.from_date, (s2.salary - s1.salary) AS salary_growth
+ FROM salaries AS s1, salaries AS s2
+ WHERE s1.emp_no = s2.emp_no
+ AND s2.salary - s1.salary > 5000
+ AND strftime('%Y',s2.to_date) - strftime('%Y',s1.to_date) = 1
+ ORDER BY salary_growth DESC;
+```
 
+## 28 查找描述信息中包括robot的电影对应的分类名称以及电影数目，而且还需要该分类对应电影数量>=5
+
+```sql
+SELECT ls3.name,COUNT(ls1.film_id) num
+FROM film ls1 INNER JOIN film_category ls2 ON ls1.film_id = ls2.film_id
+INNER JOIN category ls3 ON ls2.category_id = ls3.category_id  AND ls2.category_id IN 
+(SELECT ls5.category_id FROM film ls4 INNER JOIN film_category ls5 ON ls4.film_id = ls5.film_id
+GROUP BY ls5.category_id HAVING COUNT(ls4.film_id)>=5)
+WHERE ls1.description LIKE '%robot%' GROUP BY ls3.name;
+```
+
+##### Note
+
+题目中电影数目>=5 是这类电影的所有数目，并不是包含了robot的这类电影的数目，这里很坑，属于题目表述不当
