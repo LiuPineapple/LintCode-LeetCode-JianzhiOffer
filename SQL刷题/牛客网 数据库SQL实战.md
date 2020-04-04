@@ -337,3 +337,70 @@ WHERE ls1.description LIKE '%robot%' GROUP BY ls3.name;
 ##### Note
 
 题目中电影数目>=5 是这类电影的所有数目，并不是包含了robot的这类电影的数目，这里很坑，属于题目表述不当
+
+## 29 使用join查询方式找出没有分类的电影id以及名称
+
+```sql
+SELECT f.film_id,f.title FROM film f LEFT JOIN film_category fc ON f.film_id = fc.film_id 
+WHERE fc.category_id IS NULL;
+```
+
+## 30 使用子查询的方式找出属于Action分类的所有电影对应的title,description
+
+```sql
+SELECT f.title,f.description FROM film f WHERE f.film_id IN
+(SELECT fc.film_id FROM film_category fc INNER JOIN category c ON 
+ fc.category_id = c.category_id AND c.name = 'Action');
+```
+
+## 31 获取select * from employees对应的执行计划
+
+```sql
+EXPLAIN SELECT * FROM employees;
+```
+
+##### Note
+
+通过 explain 命令获取 select 语句的执行计划:
+
+https://www.cnblogs.com/butterfly100/archive/2018/01/15/8287569.html
+
+https://blog.csdn.net/jianghao_ava/article/details/83187414
+
+## 32 将employees表的所有员工的last_name和first_name拼接起来作为Name
+
+在本题的SQLite中：
+
+```sql
+SELECT last_name||" "||first_name Name FROM employees;
+```
+
+MySQL、SQL Server、Oracle等数据库支持CONCAT方法:
+
+```sql
+select CONCAT(CONCAT(last_name," "),first_name) as Name  from employees
+或者
+select CONCAT(last_name," "，first_name) as Name  from employees
+```
+
+## 33 创建一个actor表，包含如下列信息
+
+```sql
+CREATE TABLE actor(actor_id smallint(5) NOT NULL,
+                  first_name varchar(45) NOT NULL,
+                  last_name varchar(45) NOT NULL,
+                  last_update timestamp NOT NULL DEFAULT(datetime('now','localtime')),
+                  PRIMARY KEY(actor_id));
+```
+
+## 34 批量插入数据
+
+```sql
+INSERT INTO actor VALUES(1,'PENELOPE','GUINESS','2006-02-15 12:34:33'),
+(2,'NICK','WAHLBERG','2006-02-15 12:34:33');
+```
+
+##### Note
+
+虽然时间数据在数据库里是特定时间类型，但是我们在插入/过滤的时候只要使用规范格式的字符串即可，数据库会自行识别转换为时间类型
+
