@@ -82,7 +82,7 @@ WHERE e.emp_no = s.emp_no AND e.hire_date=s.from_date
 ORDER BY e.emp_no DESC;
 ```
 
-#### Note
+##### Note
 
 对于e.emp_no这一列，列名就是empo_no,如果不加别名在客户机上看到的就是empo_no，加别名则显示别名。但是在代码中的时候，为了不产生歧义，必须使用完全限定列名。即可能产生歧义的列名，在SQL代码中一律使用完全限定列名
 
@@ -403,4 +403,40 @@ INSERT INTO actor VALUES(1,'PENELOPE','GUINESS','2006-02-15 12:34:33'),
 ##### Note
 
 虽然时间数据在数据库里是特定时间类型，但是我们在插入/过滤的时候只要使用规范格式的字符串即可，数据库会自行识别转换为时间类型
+
+## 35 批量插入数据，不使用replace操作
+
+```sql
+INSERT OR IGNORE INTO actor VALUES (3,'ED','CHASE','2006-02-15 12:34:33');
+```
+
+##### Note
+
+因为是在SQLite中，所以是INSERT OR IGNORE INTO，如果在MySQL中，需要把OR去掉
+
+## 36 创建一个actor_name表
+
+```sql
+CREATE TABLE actor_name AS SELECT first_name,last_name FROM actor;
+```
+
+##### Note
+
+因为是在SQLite中，所以要有AS，如果在MySQL中，AS可以有可以没有
+
+## 37 对first_name创建唯一索引uniq_idx_firstname
+
+在本题的SQLite中：
+
+```sql
+CREATE UNIQUE INDEX uniq_idx_firstname ON actor(first_name);
+CREATE INDEX idx_lastname ON actor(last_name);
+```
+
+在MySQL中上面的代码也正确，但推荐使用如下代码：
+
+```sql
+ALTER TABLE actor ADD UNIQUE uniq_idx_firstname(first_name);
+ALTER TABLE actor ADD INDEX idx_lastname(last_name);
+```
 
