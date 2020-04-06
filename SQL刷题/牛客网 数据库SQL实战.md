@@ -440,3 +440,107 @@ ALTER TABLE actor ADD UNIQUE uniq_idx_firstname(first_name);
 ALTER TABLE actor ADD INDEX idx_lastname(last_name);
 ```
 
+## 38 针对actor表创建视图actor_name_view
+
+```sql
+CREATE VIEW actor_name_view AS SELECT  first_name first_name_v,last_name last_name_v
+FROM actor;
+```
+
+## 39 针对上面的salaries表emp_no字段创建索引idx_emp_no
+
+```sql
+SELECT * FROM salaries INDEXED BY idx_emp_no WHERE emp_no = 10005;
+```
+
+##### Note
+
+通常来说，优化器会自动选择合适的索引，如果要强制使用某个索引的话如下所示
+
+SQLite中，使用 INDEXED BY 语句进行强制索引查询，可参考：
+
+http://www.runoob.com/sqlite/sqlite-indexed-by.html
+
+MySQL中，使用 FORCE INDEX 语句进行强制索引查询，可参考：
+
+http://www.jb51.net/article/49807.htm
+
+## 40 在last_update后面新增加一列名字为create_date
+
+```sql
+ALTER TABLE actor ADD create_date datetime NOT NULL DEFAULT '0000-00-00 00:00:00';
+```
+
+##### Note
+
+这里的datetime纯粹为了跟标准答案一致才用的小写
+
+## 41 构造一个触发器audit_log
+
+```sql
+CREATE TRIGGER audit_log AFTER INSERT ON employees_test FOR EACH ROW 
+BEGIN
+INSERT INTO audit VALUES(NEW.ID,NEW.NAME);
+END;
+```
+
+## 42 删除emp_no重复的记录，只保留最小的id对应的记录。
+
+```sql
+DELETE FROM titles_test WHERE id NOT IN 
+(SELECT MIN(id) FROM titles_test GROUP BY emp_no);
+```
+
+## 43 将所有to_date为9999-01-01的全部更新为NULL
+
+```sql
+UPDATE titles_test SET to_date = NULL,from_date = '2001-01-01' WHERE to_date = '9999-01-01';
+```
+
+## 44 将id=5以及emp_no=10001的行数据替换成id=5以及emp_no=10005
+
+```sql
+REPLACE INTO titles_test SELECT 5,10005,title,from_date,to_date FROM titles_test WHERE id = 5;
+```
+
+##### Note
+
+1. 如果用SELECT语句填充值的话就不需要VALUES
+2. REPLACE INTO要使用全列插入，即要将所有字段的值写出，否则将置为空
+
+## 45 将titles_test表名修改为titles_2017
+
+在本题的SQLite中：
+
+```sql
+ALTER TABLE titles_test RENAME TO titles_2017;
+```
+
+在MySQL中上面的代码也正确，但也可以使用如下代码：
+
+```sql
+RENAME TABLE titles_test TO titles_2017;
+```
+
+##### Note
+
+重命名只记住使用ALTER 的就可以，创建索引只记住使用CREATE的就可以
+
+## 46 在audit表上创建外键约束，其emp_no对应employees_test表的主键id
+
+在本题的SQLite中，只能删除表再创建表
+
+```sql
+DROP TABLE audit;
+CREATE TABLE audit(
+    EMP_no INT NOT NULL,
+    create_date datetime NOT NULL,
+    FOREIGN KEY(EMP_no) REFERENCES employees_test(ID));
+```
+
+在MySQL中：
+
+```sql
+ALTER TABLE audit ADD CONSTRAINT fk_EMP_NO FOREIGN KEY(EMP_no) REFERENCES employees_test(ID));
+```
+
