@@ -524,7 +524,7 @@ RENAME TABLE titles_test TO titles_2017;
 
 ##### Note
 
-重命名只记住使用ALTER 的就可以，创建索引只记住使用CREATE的就可以
+重命名/创建约束只记住使用ALTER 的就可以，创建索引/视图/触发器只记住使用CREATE的就可以
 
 ## 46 在audit表上创建外键约束，其emp_no对应employees_test表的主键id
 
@@ -542,5 +542,106 @@ CREATE TABLE audit(
 
 ```sql
 ALTER TABLE audit ADD CONSTRAINT fk_EMP_NO FOREIGN KEY(EMP_no) REFERENCES employees_test(ID));
+```
+
+## 47 如何获取emp_v和employees有相同的数据no
+
+```sql
+SELECT * FROM employees INTERSECT SELECT * FROM emp_v;
+```
+
+## 48 将所有获取奖金的员工当前的薪水增加10%
+
+```sql
+UPDATE salaries SET salary = salary*1.1 WHERE emp_no IN (SELECT emp_no FROM emp_bonus);
+```
+
+##### Note
+
+在MySQL中，赋值和比较运算符中的等于都是=
+
+## 49 针对库中的所有表生成select count(*)对应的SQL语句
+
+sqlite写法(牛客网通过)： 
+
+```sql
+select "select count(*) from "||name||";" as cnts from sqlite_master where type='table';
+```
+
+https://blog.csdn.net/xingfeng0501/article/details/7804378
+
+ mysql写法(牛客网不通过，但是我在自己的mysql上运行通过)： 
+
+```sql
+select concat("select count(*) from ",table_name,";") as cnts from (select table_name from information_schema.tables) as new;
+```
+
+在MySQL中基本认为schema就是数据库，information_schema.tables保存了所有数据库中的所有数据表，其中，table_schema字段代表所在数据库，table_name字段代表表的名字。
+
+## 50 将employees表中的所有员工的last_name和first_name通过(')连接起来。
+
+```sql
+SELECT last_name||"'"||first_name FROM employees;
+```
+
+## 51 查找字符串'10,A,B' 中逗号','出现的次数cnt
+
+```sql
+SELECT (length("10,A,B")-length(replace("10,A,B",",","")))/length(",") AS cnt;
+```
+
+##### Note
+
+1. SQL当中的replace函数是替换值，Excel中的replace函数是替换位置
+2. SQL当中的长度用LENGTH，Excel和Python当中的是len
+
+## 52 获取Employees中的first_name
+
+```sql
+SELECT first_name FROM employees ORDER BY substr(first_name,length(first_name)-1,2);
+```
+
+##### Note
+
+1. sql substr 函数https://blog.csdn.net/l358366885/article/details/79973430，作用和参数类似excel当中的mid函数
+2. Python无论是表还是序列都是从0开始的，Excel无论是表还是序列都是从1开始的，当前时间是0，SQL的表索引是从0开始的，序列是从1开始的。负数索引这三个都一样
+
+## 53 按照dept_no进行汇总
+
+在本题的SQLite中
+
+```sql
+SELECT dept_no,GROUP_CONCAT(emp_no,",") FROM dept_emp GROUP BY dept_no;
+```
+
+https://blog.csdn.net/langzxz/article/details/16807859
+
+在MySQL中
+
+```sql
+SELECT dept_no,GROUP_CONCAT(emp_no SEPARATOR ",") FROM dept_emp GROUP BY dept_no;
+```
+
+https://blog.csdn.net/u012620150/article/details/81945004
+
+## 54 查找排除当前最大、最小salary之后的员工的平均工资avg_salary
+
+```sql
+SELECT AVG(salary) avg_salary FROM salaries WHERE to_date = '9999-01-01' AND salary BETWEEN
+(SELECT salary FROM salaries ORDER BY salary LIMIT 1,1) 
+AND (SELECT salary FROM salaries ORDER BY salary DESC LIMIT 1,1);
+```
+
+## 55 分页查询employees表，每5行一页，返回第2页的数据
+
+```sql
+SELECT * FROM employees LIMIT (2-1)*5,5;
+```
+
+## 56 获取所有员工的emp_no
+
+```sql
+SELECT e.emp_no,e.dept_no,b.btype,b.recevied 
+FROM dept_emp e LEFT JOIN emp_bonus b ON e.emp_no = b.emp_no;
 ```
 
