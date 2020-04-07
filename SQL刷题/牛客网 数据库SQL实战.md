@@ -550,6 +550,10 @@ ALTER TABLE audit ADD CONSTRAINT fk_EMP_NO FOREIGN KEY(EMP_no) REFERENCES employ
 SELECT * FROM employees INTERSECT SELECT * FROM emp_v;
 ```
 
+##### Note
+
+SQL中的集合操作见SQL学习指南第6章，使用集合
+
 ## 48 将所有获取奖金的员工当前的薪水增加10%
 
 ```sql
@@ -645,3 +649,66 @@ SELECT e.emp_no,e.dept_no,b.btype,b.recevied
 FROM dept_emp e LEFT JOIN emp_bonus b ON e.emp_no = b.emp_no;
 ```
 
+## 57 使用含有关键字exists查找未分配具体部门的员工的所有信息。
+
+```sql
+SELECT * FROM employees WHERE NOT EXISTS(SELECT * FROM dept_emp 
+                                         WHERE dept_emp.emp_no = employees.emp_no);
+```
+
+##### Note
+
+SQL中EXISTS语句的使用：
+
+见 SQL学习指南第9章 子查询，以及以下链接
+
+https://blog.csdn.net/weixin_43901882/article/details/89467490
+
+https://www.runoob.com/sql/sql-exists.html
+
+https://www.cnblogs.com/xuanhai/p/5810918.html
+
+## 58 获取employees中的行数据，且这些行也存在于emp_v中
+
+```sql
+SELECT * FROM employees where emp_no>10005;
+```
+
+什么智障题
+
+## 59 获取有奖金的员工相关信息。
+
+```sql
+SELECT e.emp_no,e.first_name,e.last_name,b.btype,s.salary,
+CASE b.btype WHEN 1 THEN 0.1*salary WHEN 2 THEN 0.2*salary ELSE 0.3*salary END bonus
+FROM employees e INNER JOIN emp_bonus b ON e.emp_no = b.emp_no
+INNER JOIN salaries s ON e.emp_no = s.emp_no AND s.to_date = '9999-01-01';
+```
+
+##### Note
+
+SQL中CASE语句的使用：见 SQL学习指南第11章  条件逻辑
+
+## 60 统计salary的累计和running_total
+
+```sql
+SELECT s1.emp_no,s1.salary,
+(SELECT SUM(s2.salary) FROM salaries s2 WHERE s2.emp_no<=s1.emp_no AND s2.to_date = '9999-01-01')
+running_total FROM salaries s1 WHERE s1.to_date = '9999-01-01';
+```
+
+##### Note
+
+1. 题干叙述有误，running_total应该是所有小于等于的累加
+2. 本题考查关联子查询
+
+## 61 对于employees表中，给出奇数行的first_name
+
+```sql
+SELECT e1.first_name FROM employees e1 WHERE (SELECT COUNT(*) FROM employees e2 
+                                              WHERE e1.first_name>=e2.first_name)%2 = 1;
+```
+
+##### Note
+
+题干叙述有误,正确的题目应该是对于employees表，在对first_name进行排名后，选出奇数排名对应的first_name
