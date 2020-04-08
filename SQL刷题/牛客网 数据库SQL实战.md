@@ -361,11 +361,12 @@ EXPLAIN SELECT * FROM employees;
 
 ##### Note
 
-通过 explain 命令获取 select 语句的执行计划:
+1. 通过 explain 命令获取 select 语句的执行计划：
+   - https://www.cnblogs.com/butterfly100/archive/2018/01/15/8287569.html
+   - https://blog.csdn.net/jianghao_ava/article/details/83187414
 
-https://www.cnblogs.com/butterfly100/archive/2018/01/15/8287569.html
-
-https://blog.csdn.net/jianghao_ava/article/details/83187414
+2. 在SELECT语句前加EXPLAIN关键字，返回SELECT语句的执行计划，而不会执行SELECT语句（如果 from 中包含子查询，仍会执行该子查询，将结果放入临时表中）。执行计划包括访问表的顺序，查询的操作类型，哪些索引可以使用，哪些索引被实际使用 等等。
+3. id 关键字按照SELECT的出现顺序排列，大小按照执行顺序赋值，id相同，执行顺序从上往下；id不同，id值越大，优先级越高，越先执行
 
 ## 32 将employees表的所有员工的last_name和first_name拼接起来作为Name
 
@@ -375,13 +376,17 @@ https://blog.csdn.net/jianghao_ava/article/details/83187414
 SELECT last_name||" "||first_name Name FROM employees;
 ```
 
-MySQL、SQL Server、Oracle等数据库支持CONCAT方法:
+MySQL支持CONCAT方法:
 
 ```sql
 select CONCAT(CONCAT(last_name," "),first_name) as Name  from employees
 或者
 select CONCAT(last_name," "，first_name) as Name  from employees
 ```
+
+##### Note
+
+SQL字符串相关函数见SQL学习指南第7章第1节
 
 ## 33 创建一个actor表，包含如下列信息
 
@@ -392,6 +397,11 @@ CREATE TABLE actor(actor_id smallint(5) NOT NULL,
                   last_update timestamp NOT NULL DEFAULT(datetime('now','localtime')),
                   PRIMARY KEY(actor_id));
 ```
+
+##### Note
+
+1. 牛客使用sqlite对部分大小写敏感，刚开始字段类型和datetime函数用大写一直无法通过，真的坑
+2. SQL日期时间相关函数见SQL学习指南第7章第3节
 
 ## 34 批量插入数据
 
@@ -596,19 +606,32 @@ SELECT (length("10,A,B")-length(replace("10,A,B",",","")))/length(",") AS cnt;
 
 ##### Note
 
-1. SQL当中的replace函数是替换值，Excel中的replace函数是替换位置
-2. SQL当中的长度用LENGTH，Excel和Python当中的是len
+1. SQL字符串相关函数见SQL学习指南第7章第1节
+2. SQL当中的replace函数是替换值，Excel中的replace函数是替换位置，类似于Mysql当中的INSERT ;  SQL当中的长度用LENGTH，Excel和Python当中的是len
 
 ## 52 获取Employees中的first_name
 
 ```sql
-SELECT first_name FROM employees ORDER BY substr(first_name,length(first_name)-1,2);
+SELECT first_name FROM employees ORDER BY SUBSTR(first_name,LENGTH(first_name)-1,2);
+```
+
+或者
+
+```sql
+SELECT first_name FROM employees ORDER BY SUBSTR(first_name,-2,2);
 ```
 
 ##### Note
 
-1. sql substr 函数https://blog.csdn.net/l358366885/article/details/79973430，作用和参数类似excel当中的mid函数
-2. Python无论是表还是序列都是从0开始的，Excel无论是表还是序列都是从1开始的，当前时间是0，SQL的表索引是从0开始的，序列是从1开始的。负数索引这三个都一样
+1. SQL字符串相关函数见SQL学习指南第7章第1节
+
+2. 如果是Mysql应该改为substring函数，sqlite substr 函数等同于Mysql中的substring函数
+
+   https://blog.csdn.net/l358366885/article/details/79973430
+
+   作用和参数类似excel当中的mid函数
+
+3. Python无论是表还是序列都是从0开始的，Excel无论是表还是序列都是从1开始的，当前时间是0，SQL的表索引是从0开始的，序列是从1开始的。负数索引这三个都一样
 
 ## 53 按照dept_no进行汇总
 
@@ -627,6 +650,8 @@ SELECT dept_no,GROUP_CONCAT(emp_no SEPARATOR ",") FROM dept_emp GROUP BY dept_no
 ```
 
 https://blog.csdn.net/u012620150/article/details/81945004
+
+MySQL中的这个GROUP_CONCAT函数，参数之间没有逗号
 
 ## 54 查找排除当前最大、最小salary之后的员工的平均工资avg_salary
 
