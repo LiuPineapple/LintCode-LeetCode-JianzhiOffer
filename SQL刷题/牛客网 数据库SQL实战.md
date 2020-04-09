@@ -386,7 +386,8 @@ select CONCAT(last_name," "，first_name) as Name  from employees
 
 ##### Note
 
-SQL字符串相关函数见SQL学习指南第7章第1节
+1. SQL字符串相关函数见SQL学习指南第7章第1节，Mysql必知必会第11章
+2. 需要掌握的字符串处理函数有UPPER,LOWER,LEFT,RIGHT,LTRIM,RTRIM,INSERT,REPLACE,SUBSTRING,LENGTH,POSITION,LOCATE,CONCAT,GROUP_CONCAT,
 
 ## 33 创建一个actor表，包含如下列信息
 
@@ -401,7 +402,9 @@ CREATE TABLE actor(actor_id smallint(5) NOT NULL,
 ##### Note
 
 1. 牛客使用sqlite对部分大小写敏感，刚开始字段类型和datetime函数用大写一直无法通过，真的坑
-2. SQL日期时间相关函数见SQL学习指南第7章第3节
+2. Mysql的获取当前时间的函数与牛客网使用的sqlite不同
+3. SQL日期时间相关函数见SQL学习指南第7章第3节,Mysql必知必会第11章
+4. 需要掌握的事件处理函数有DATE,TIME,YEAR,MONTH,STR_TO_DATE,CURRENT_DATE/TIME/TIMESTAMP,NOW,DATEDIFF
 
 ## 34 批量插入数据
 
@@ -422,7 +425,12 @@ INSERT OR IGNORE INTO actor VALUES (3,'ED','CHASE','2006-02-15 12:34:33');
 
 ##### Note
 
-因为是在SQLite中，所以是INSERT OR IGNORE INTO，如果在MySQL中，需要把OR去掉
+1. 因为是在SQLite中，所以是INSERT OR IGNORE INTO，如果在MySQL中，需要把OR去掉
+2. REPLACE INTO,ON DUPLICATE KEY等的用法见如下链接：
+   - https://www.cnblogs.com/flyingeagle/articles/9825949.html
+   - https://www.cnblogs.com/sweet521/p/5730804.html
+
+3. 在插入数据时，无论是哪个语句，所检查的都是PRIMARY或UNIQUE INDEX，也就是这两个中任意一个重复就不能直接插入
 
 ## 36 创建一个actor_name表
 
