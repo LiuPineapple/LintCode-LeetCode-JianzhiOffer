@@ -458,12 +458,20 @@ ALTER TABLE actor ADD UNIQUE uniq_idx_firstname(first_name);
 ALTER TABLE actor ADD INDEX idx_lastname(last_name);
 ```
 
+##### Note
+
+索引和约束相关知识见SQL学习指南第13章 索引和约束
+
 ## 38 针对actor表创建视图actor_name_view
 
 ```sql
 CREATE VIEW actor_name_view AS SELECT  first_name first_name_v,last_name last_name_v
 FROM actor;
 ```
+
+##### Note
+
+视图相关知识见SQL学习指南第14章 视图
 
 ## 39 针对上面的salaries表emp_no字段创建索引idx_emp_no
 
@@ -481,7 +489,7 @@ http://www.runoob.com/sqlite/sqlite-indexed-by.html
 
 MySQL中，使用 FORCE INDEX 语句进行强制索引查询，可参考：
 
-http://www.jb51.net/article/49807.htm
+http://blog.sina.com.cn/s/blog_6004d60d0102xr8y.html
 
 ## 40 在last_update后面新增加一列名字为create_date
 
@@ -491,7 +499,8 @@ ALTER TABLE actor ADD create_date datetime NOT NULL DEFAULT '0000-00-00 00:00:00
 
 ##### Note
 
-这里的datetime纯粹为了跟标准答案一致才用的小写
+1. 这里的datetime纯粹为了跟标准答案一致才用的小写
+2. DEFAULT 要放在NOT NULL 之后
 
 ## 41 构造一个触发器audit_log
 
