@@ -511,6 +511,35 @@ INSERT INTO audit VALUES(NEW.ID,NEW.NAME);
 END;
 ```
 
+在Mysql中上述代码无法执行，应该使用如下代码：
+
+```sql
+-- 第一种方法
+CREATE TRIGGER audit_log AFTER INSERT ON employees_test FOR EACH ROW 
+INSERT INTO audit VALUES(NEW.ID,NEW.NAME);
+-- 第二种方法
+DELIMITER //
+CREATE TRIGGER audit_log AFTER INSERT ON employees_test FOR EACH ROW 
+BEGIN
+INSERT INTO audit VALUES(NEW.ID,NEW.NAME);
+END//
+DELIMITER ;
+```
+
+##### Note
+
+1. 触发器知识见Mysql必知必会 第25章 使用触发器
+2. 补充知识见如下链接：
+   - https://www.cnblogs.com/geaozhang/p/6819648.html
+   - https://blog.csdn.net/zhangai8351205/article/details/84144361
+
+3. Mysql中的变量：https://www.cnblogs.com/Brambling/p/9259375.html
+4. 通常begin-end用于定义一组语句块，在各大数据库中的客户端工具中可直接调用，但在mysql中不可。见如下链接：
+   - https://www.cnblogs.com/oDoraemon/p/5881885.html
+   - https://blog.csdn.net/yuxin6866/article/details/52722913
+
+5. 在sqlite中，触发器中必须使用BEGIN-END语句块，但MYSQL中不必须，如果非要使用，需要先更改结束符。
+
 ## 42 删除emp_no重复的记录，只保留最小的id对应的记录。
 
 ```sql
@@ -524,6 +553,10 @@ DELETE FROM titles_test WHERE id NOT IN
 UPDATE titles_test SET to_date = NULL,from_date = '2001-01-01' WHERE to_date = '9999-01-01';
 ```
 
+##### Note
+
+update 并非要全列更新，哪一列更新写哪一列，中间用逗号连接。
+
 ## 44 将id=5以及emp_no=10001的行数据替换成id=5以及emp_no=10005
 
 ```sql
@@ -533,7 +566,8 @@ REPLACE INTO titles_test SELECT 5,10005,title,from_date,to_date FROM titles_test
 ##### Note
 
 1. 如果用SELECT语句填充值的话就不需要VALUES
-2. REPLACE INTO要使用全列插入，即要将所有字段的值写出，否则将置为空
+2. REPLACE INTO 的用法见：https://www.cnblogs.com/zxf100/p/10882138.html
+3. REPLACE INTO判断的是PRIMARY或UNIQUE，两者只要有一个重复就执行删除再插入操作，在插入的记录在之前所有记录的最后。由于相当于插入新的行，所以REPLACE INTO后面各个列的值都要齐全（考虑自增和默认值），要类似INSERT INTO 一样。
 
 ## 45 将titles_test表名修改为titles_2017
 
