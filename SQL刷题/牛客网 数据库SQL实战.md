@@ -605,6 +605,10 @@ CREATE TABLE audit(
 ALTER TABLE audit ADD CONSTRAINT fk_EMP_NO FOREIGN KEY(EMP_no) REFERENCES employees_test(ID));
 ```
 
+##### Note
+
+注意references 后面没有to
+
 ## 47 如何获取emp_v和employees有相同的数据no
 
 ```sql
