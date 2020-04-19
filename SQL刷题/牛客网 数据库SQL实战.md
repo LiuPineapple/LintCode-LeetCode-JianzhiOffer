@@ -11,6 +11,7 @@ WHERE hire_date=
 ##### Note
 
 1. 注意优先级顺序,括号用来改变优先级，括号中的内容最先计算
+2. 对于时间来说，越靠后越大，可以使用MAX，MIN
 
 ## 2 查找入职员工时间排名倒数第三的员工所有信息
 
@@ -84,7 +85,7 @@ ORDER BY e.emp_no DESC;
 
 ##### Note
 
-对于e.emp_no这一列，列名就是empo_no,如果不加别名在客户机上看到的就是empo_no，加别名则显示别名。但是在代码中的时候，为了不产生歧义，必须使用完全限定列名。即可能产生歧义的列名，在SQL代码中一律使用完全限定列名
+对于e.emp_no这一列，列名就是emp_no,如果不加别名在客户机上看到的就是emp_no，加别名则显示别名。但是在代码中的时候，为了不产生歧义，必须使用完全限定列名。即可能产生歧义的列名，在SQL代码中一律使用完全限定列名
 
 ## 7 查找薪水涨幅超过15次的员工号emp_no以及其对应的涨幅次数t
 
@@ -108,9 +109,27 @@ HAVING t>15
 
 ## 8 找出所有员工当前薪水salary情况
 
+使用GROUP BY
+
 ```sql
 SELECT salary FROM salaries WHERE to_date='9999-01-01' GROUP BY salary ORDER BY salary DESC;
 ```
+
+使用DISTINCT
+
+```sql
+SELECT DISTINCT salary FROM salaries WHERE to_date = '9999-01-01' ORDER BY salary DESC;
+```
+
+##### Note
+
+1. 对于distinct与group by的使用: 
+   - 当对系统的性能高并数据量大时使用group by，大表一般用distinct效率不高，大数据量的时候都禁止用distinct
+   - 当对系统的性能不高时使用数据量少时两者皆可 
+   - 尽量使用group by，但也要会用DISTINCT
+
+2. 一般只有在子查询和运算符优先级确定的时候才用括号，其他情况不用，比如上面如果给```DISTINCT salary```加括号就会报错
+3. ORDER BY 后面跟的应该是SELECT结束后的列名，即跟之前的运算无关，之前运算选择完数据了，它再根据某一列排序
 
 ## 9 获取所有部门当前manager的当前薪水情况，给出dept_no, emp_no以及salary，当前表示to_date='9999-01-01'
 
@@ -143,11 +162,28 @@ AND e.emp_no <> m.emp_no;
 ## 12 获取所有部门中当前员工薪水最高的相关信息
 
 ```sql
-SELECT d.dept_no,d.emp_no,max(s.salary) salary
-FROM dept_emp d INNER JOIN salaries s
-ON d.emp_no = s.emp_no AND d.to_date = '9999-01-01' AND s.to_date = '9999-01-01'
+SELECT d.dept_no,s.emp_no,MAX(s.salary) salary FROM dept_emp d INNER JOIN salaries s 
+ON d.emp_no = s.emp_no AND d.to_date='9999-01-01' AND s.to_date='9999-01-01'
 GROUP BY d.dept_no;
 ```
+
+##### Note
+
+1. 聚合函数聚合的是筛选之后的数据，或者说SELECT选择的就是筛选之后的数据中的几列
+
+2. 如果是COUNT(),SUM(),AVG()那么聚合函数之前只能跟聚合后值唯一的列，但如果是MAX(),MIN()那么聚合函数之前也可以跟其他列，结果就是最大/最小对应的那一行
+
+3. SQL语句的书写顺序是SELECT...FROM...[JOIN...ON...]WHERE...GROUP BY...HAVING...ORDER BY...LIMIT
+
+   执行顺序是:
+
+   - 先把表拼在一起 FROM...[JOIN...ON...]
+   - 再筛选 WHERE...
+   - 再聚合 GROUP BY...
+   - 再选列 SELECT... 
+   - 再对列进行筛选 HAVING...
+   - 排序 ORDER BY...
+   - 分页输出 LIMIT
 
 ## 13 从titles表获取按照title进行分组
 
@@ -767,7 +803,8 @@ INNER JOIN salaries s ON e.emp_no = s.emp_no AND s.to_date = '9999-01-01';
 
 ##### Note
 
-SQL中CASE语句的使用：见 SQL学习指南第11章  条件逻辑
+1. SQL中CASE语句的使用：见 SQL学习指南第11章  条件逻辑
+2. CASE语句后面一定要有END，触发器在sqlite中一定要有BEGIN,END而且不用改结束符，在Mysql中可以没有BEGIN,END，如果要有的话，需要在语句最前面更改结束符DELIMITER，在语句最后面改回来
 
 ## 60 统计salary的累计和running_total
 
