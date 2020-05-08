@@ -12,6 +12,7 @@ WHERE hire_date=
 
 1. 注意优先级顺序,括号用来改变优先级，括号中的内容最先计算
 2. 对于时间来说，越靠后越大，可以使用MAX，MIN
+3. SQL中的聚合函数后面不一定要跟GROUP BY，也可以跟WHERE或者什么都不跟
 
 ## 2 查找入职员工时间排名倒数第三的员工所有信息
 
@@ -72,7 +73,8 @@ ON e.emp_no = d.emp_no;
 
 ##### Note
 
-如果一个员工没有分配部门，那么dept_emp这张表里就不会有他的记录
+1. 如果一个员工没有分配部门，那么dept_emp这张表里就不会有他的记录
+2. LEFT JOIN是LEFT OUTER JOIN的简写，保险起见还是用后者比较好
 
 ## 6 查找所有员工入职时候的薪水情况
 
@@ -129,7 +131,7 @@ SELECT DISTINCT salary FROM salaries WHERE to_date = '9999-01-01' ORDER BY salar
    - 尽量使用group by，但也要会用DISTINCT
 
 2. 一般只有在子查询和运算符优先级确定的时候才用括号，其他情况不用，比如上面如果给```DISTINCT salary```加括号就会报错
-3. ORDER BY 后面跟的应该是SELECT结束后的列名，即跟之前的运算无关，之前运算选择完数据了，它再根据某一列排序
+3. ORDER BY 后面跟的应该是SELECT和HAVING结束后的列名，即跟之前的运算无关，之前运算选择完数据了，它再根据某一列排序
 
 ## 9 获取所有部门当前manager的当前薪水情况，给出dept_no, emp_no以及salary，当前表示to_date='9999-01-01'
 
@@ -185,6 +187,8 @@ GROUP BY d.dept_no;
    - 排序 ORDER BY...
    - 分页输出 LIMIT
 
+​         每一步都是在上一步执行后形成的表中进行操作。
+
 ## 13 从titles表获取按照title进行分组
 
 ```sql
@@ -221,10 +225,6 @@ ON t.emp_no = s.emp_no AND t.to_date = '9999-01-01' AND s.to_date = '9999-01-01'
 GROUP BY title;
 ```
 
-##### Note
-
-WHERE是从FROM后面的表中筛选（算上JOIN,ON之后的），GROUP BY 是从FROM WHERE选出的表中分组，HAVING是从SELECT...FROM...(JOIN ON)...WHERE...GROUP BY...之后得到的表中筛选，ORDER BY 是在之前所有操作后得到的表中排序，最后再LIMIT OFFSET限制输出，SELECT是在后面选好的表中找列
-
 ## 17 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary
 
 ```sql
@@ -234,6 +234,10 @@ AND to_date='9999-01-01';
 ```
 
 下面是参考别人的更具有普适性的做法，可以应对薪水第3多的，第4多的等等
+
+```sql
+SELECT emp_no,salary FROM salaries WHERE to_date='9999-01-01' ORDER BY salary DESC LIMIT 1,1;
+```
 
 ```sql
 SELECT emp_no,salary FROM salaries WHERE to_date = '9999-01-01' AND salary = 
