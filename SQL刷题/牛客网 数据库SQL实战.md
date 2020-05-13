@@ -12,7 +12,7 @@ WHERE hire_date=
 
 1. 注意优先级顺序,括号用来改变优先级，括号中的内容最先计算
 2. 对于时间来说，越靠后越大，可以使用MAX，MIN
-3. SQL中的聚合函数后面不一定要跟GROUP BY，也可以跟WHERE或者什么都不跟
+3. SQL中的聚合函数后面不一定要跟GROUP BY，也可以跟WHERE或者什么都不跟；同理GROUP BY前面也不一定要有聚合函数，例子见下面第8题
 
 ## 2 查找入职员工时间排名倒数第三的员工所有信息
 
@@ -263,7 +263,9 @@ LEFT OUTER JOIN departments dp on d.dept_no = dp.dept_no;
 
 ##### Note
 
-使用两次左连接
+第一次左联结的结果中，dept_no这一列有很多NULL
+
+第二次也要使用左联结，departments表对于NULL值无法匹配，所以会保留一行，右表值全部为NULL，结果没问题
 
 ## 20 查找员工编号emp_no为10001其自入职以来的薪水salary涨幅值growth
 
@@ -287,9 +289,20 @@ SELECT start.emp_no,current.salary - start.salary growth FROM
 (SELECT e.emp_no,s.salary FROM employees e INNER JOIN salaries s ON e.emp_no = s.emp_no 
 AND e.hire_date = s.from_date) start INNER JOIN
 (SELECT e.emp_no,s.salary FROM employees e INNER JOIN salaries s ON e.emp_no = s.emp_no 
-AND s.tO_date = '9999-01-01') current
+AND s.to_date = '9999-01-01') current
 ON start.emp_no = current.emp_no ORDER BY growth;
 ```
+
+---
+
+##### Note
+
+1. 见Mysql必知必会第10章，计算字段
+2. 给算术计算字段加别名时，算术运算不用加括号
+
+2. 不要害怕复杂，当思考后觉得简单的无法完成题目要求就大胆上复杂的，不要耽误时间
+
+---
 
 ## 22 统计各个部门的工资记录数
 
