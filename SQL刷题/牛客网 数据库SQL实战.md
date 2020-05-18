@@ -10,9 +10,10 @@ WHERE hire_date=
 
 ##### Note
 
-1. 注意优先级顺序,括号用来改变优先级，括号中的内容最先计算
-2. 对于时间来说，越靠后越大，可以使用MAX，MIN
-3. SQL中的聚合函数后面不一定要跟GROUP BY，也可以跟WHERE或者什么都不跟；同理GROUP BY前面也不一定要有聚合函数，例子见下面第8题
+1. 做SQL题，先有清晰完整思路，再去写代码
+2. 注意优先级顺序,括号用来改变优先级，括号中的内容最先计算
+3. 对于时间来说，越靠后越大，可以使用MAX，MIN
+4. SQL中的聚合函数后面不一定要跟GROUP BY，也可以跟WHERE或者什么都不跟；同理GROUP BY前面也不一定要有聚合函数，例子见下面第8题
 
 ## 2 查找入职员工时间排名倒数第三的员工所有信息
 
@@ -129,9 +130,9 @@ SELECT DISTINCT salary FROM salaries WHERE to_date = '9999-01-01' ORDER BY salar
    - 当对系统的性能高并数据量大时使用group by，大表一般用distinct效率不高，大数据量的时候都禁止用distinct
    - 当对系统的性能不高时使用数据量少时两者皆可 
    - 尽量使用group by，但也要会用DISTINCT
-
 2. 一般只有在子查询和运算符优先级确定的时候才用括号，其他情况不用，比如上面如果给```DISTINCT salary```加括号就会报错
 3. ORDER BY 后面跟的应该是SELECT和HAVING结束后的列名，即跟之前的运算无关，之前运算选择完数据了，它再根据某一列排序
+4. DISTINCT可以用于SELECT后面，列名前面，也可以用于聚合函数中。作用域是它后面的所有列
 
 ## 9 获取所有部门当前manager的当前薪水情况，给出dept_no, emp_no以及salary，当前表示to_date='9999-01-01'
 
@@ -312,6 +313,22 @@ SELECT d.dept_no,d.dept_name,count(m.salary) sum FROM departments d INNER JOIN
 ON d.dept_no = m.dept_no GROUP BY d.dept_no;
 ```
 
+```sql
+SELECT dem.dept_no,dep.dept_name,COUNT(*) sum
+FROM dept_emp dem INNER JOIN salaries s ON dem.emp_no = s.emp_no INNER JOIN 
+departments dep ON dem.dept_no = dep.dept_no GROUP BY dem.dept_no;
+```
+
+---
+
+##### Note
+
+可以将子查询的结果作为连接表，也可以对三个表进行连接
+
+见SQL学习指南第5章 多表查询
+
+---
+
 ## 23 对所有员工的薪水按照salary进行按照1-N的排名
 
 ```sql
@@ -364,6 +381,16 @@ FROM departments d INNER JOIN dept_emp p  ON d.dept_no = p.dept_no AND p.to_date
 INNER JOIN titles t ON p.emp_no = t.emp_no AND t.to_date = '9999-01-01'
 GROUP BY d.dept_no,t.title;
 ```
+
+---
+
+##### Note
+
+嵌套分组聚合见Mysql必知必会第13章分组数据
+
+嵌套分组后使用聚合函数会在最后一次分组的结果上进行聚合
+
+---
 
 ## 27 给出每个员工每年薪水涨幅超过5000的员工编号emp_no
 
