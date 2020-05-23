@@ -403,6 +403,26 @@ SELECT s2.emp_no, s2.from_date, (s2.salary - s1.salary) AS salary_growth
  ORDER BY salary_growth DESC;
 ```
 
+以下会报错：
+
+```sql
+SELECT s2.emp_no,s2.from_date,s2.salary-s1.salary salary_growth
+FROM salaries s1 INNER JOIN salaries s2 ON s1.emp_no = s2.emp_no
+AND strftime('%Y',s2.to_date)-strftime('%Y',s1.to_date)=1 
+HAVING salary_growth>5000
+ORDER BY salary_growth DESC;
+```
+
+---
+
+##### Note 
+
+stack overflow上是这样解释的：SQL标准要求HAVING必须仅引用GROUP BY子句中的列或聚合函数列(可以是跟在SELECT后面的也可以不是)。但是，MySQL支持对此行为的扩展，并允许HAVING引用SELECT关键字后面的列以及外部子查询中的列。
+
+sqlite应该是不支持这种扩展所以上面第二段代码不对
+
+---
+
 ## 28 查找描述信息中包括robot的电影对应的分类名称以及电影数目，而且还需要该分类对应电影数量>=5
 
 ```sql
@@ -414,9 +434,19 @@ GROUP BY ls5.category_id HAVING COUNT(ls4.film_id)>=5)
 WHERE ls1.description LIKE '%robot%' GROUP BY ls3.name;
 ```
 
+```sql
+SELECT c.name,COUNT(f.film_id) FROM film f INNER JOIN film_category fc 
+ON f.film_id = fc.film_id AND f.description LIKE '%robot%' 
+INNER JOIN category c ON fc.category_id = c.category_id AND fc.category_id IN
+(SELECT fc2.category_id FROM film f2 INNER JOIN film_category fc2 ON f2.film_id = fc2.film_id 
+ GROUP BY fc2.category_id HAVING COUNT(f2.film_id)>=5)
+GROUP BY c.category_id;
+```
+
 ##### Note
 
-题目中电影数目>=5 是这类电影的所有数目，并不是包含了robot的这类电影的数目，这里很坑，属于题目表述不当
+1. 题目中电影数目>=5 是这类电影的所有数目，并不是包含了robot的这类电影的数目，这里很坑，属于题目表述不当
+2. 虽然说使用COUNT/SUM等聚合函数时SELECT后面跟的不一定是分组列，只要是分组后值唯一的列就可以，但是能用分组列的时候还是尽量用分组列，确保不会出错
 
 ## 29 使用join查询方式找出没有分类的电影id以及名称
 
@@ -481,10 +511,12 @@ CREATE TABLE actor(actor_id smallint(5) NOT NULL,
 
 ##### Note
 
-1. 牛客使用sqlite对部分大小写敏感，刚开始字段类型和datetime函数用大写一直无法通过，真的坑
-2. Mysql的获取当前时间的函数与牛客网使用的sqlite不同
-3. SQL日期时间相关函数见SQL学习指南第7章第3节,Mysql必知必会第11章
-4. 需要掌握的事件处理函数有DATE,TIME,YEAR,MONTH,STR_TO_DATE,CURRENT_DATE/TIME/TIMESTAMP,NOW,DATEDIFF
+1. 见Mysql必知必会第21章 创建和操纵表，以及廖的Mysql教程
+2. 牛客使用sqlite对部分大小写敏感，刚开始字段类型和datetime函数用大写一直无法通过，真的坑
+3. DEFAULT后面按理说是不用加括号的，不知道为什么这里不加括号无法通过
+4. Mysql的获取当前时间的函数与牛客网使用的sqlite不同
+5. SQL日期时间相关函数见SQL学习指南第7章第3节,Mysql必知必会第11章
+6. 需要掌握的事件处理函数有DATE,TIME,YEAR,MONTH,STR_TO_DATE,CURRENT_DATE/TIME/TIMESTAMP,NOW,DATEDIFF
 
 ## 34 批量插入数据
 
@@ -665,7 +697,9 @@ RENAME TABLE titles_test TO titles_2017;
 
 ##### Note
 
-重命名/创建约束只记住使用ALTER 的就可以，创建索引/视图/触发器只记住使用CREATE的就可以
+1. 重命名/添加约束只记住使用ALTER 的就可以（可以认为是修改表结构）
+
+2. 创建索引/视图/触发器只记住使用CREATE的就可以（可以认为是创建新东西）
 
 ## 46 在audit表上创建外键约束，其emp_no对应employees_test表的主键id
 
