@@ -542,7 +542,7 @@ INSERT OR IGNORE INTO actor VALUES (3,'ED','CHASE','2006-02-15 12:34:33');
    - https://www.cnblogs.com/flyingeagle/articles/9825949.html
    - https://www.cnblogs.com/sweet521/p/5730804.html
 
-3. 在插入数据时，无论是哪个语句，所检查的都是PRIMARY或UNIQUE INDEX，也就是这两个中任意一个重复就不能直接插入
+3. 在插入数据时，无论是哪个语句，所检查的都是PRIMARY KEY或UNIQUE INDEX，也就是这两个中任意一个重复就不能直接插入
 
 ## 36 创建一个actor_name表
 
@@ -563,7 +563,7 @@ CREATE UNIQUE INDEX uniq_idx_firstname ON actor(first_name);
 CREATE INDEX idx_lastname ON actor(last_name);
 ```
 
-在MySQL中上面的代码也正确，但推荐使用如下代码：
+在MySQL中上面的代码也正确，也可以使用如下代码：
 
 ```sql
 ALTER TABLE actor ADD UNIQUE uniq_idx_firstname(first_name);
