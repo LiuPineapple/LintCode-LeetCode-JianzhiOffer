@@ -176,19 +176,21 @@ GROUP BY d.dept_no;
 
 2. 如果是COUNT(),SUM(),AVG()那么聚合函数之前只能跟聚合后值唯一的列，但如果是MAX(),MIN()那么聚合函数之前也可以跟其他列，结果就是最大/最小对应的那一行
 
-3. SQL语句的书写顺序是SELECT...FROM...[JOIN...ON...]WHERE...GROUP BY...HAVING...ORDER BY...LIMIT
+3. GROUP BY 后面不一定要跟表中的列，也可以其他比如IF/SUBSTRING之类的函数或CASE WHEN END新建的列
+
+4. SQL语句的书写顺序是SELECT...FROM...[JOIN...ON...]WHERE...GROUP BY...HAVING...ORDER BY...LIMIT
 
    执行顺序是:
 
    - 先把表拼在一起 FROM...[JOIN...ON...]
    - 再筛选 WHERE...
    - 再聚合 GROUP BY...
+   - 对分组聚合结果进行筛选HAVING...
    - 再选列 SELECT... 
-   - 再对列进行筛选 HAVING...
    - 排序 ORDER BY...
    - 分页输出 LIMIT
 
-​         每一步都是在上一步执行后形成的表中进行操作。
+​         每一步都是在上一步执行后形成的表中进行操作。其中需要注意的是，HAVING 筛选的时候本来后面只能跟分组列和聚合函数列，但后来兼容了，可以用SELECT里面的列名/别名（但很多书中都不用，因为不规范），比如SELECT里面给聚合函数列起了别名，HAVING就可以拿来用。
 
 ## 13 从titles表获取按照title进行分组
 
@@ -583,7 +585,7 @@ FROM actor;
 
 ##### Note
 
-视图相关知识见SQL学习指南第14章 视图
+视图相关知识见SQL学习指南第14章 视图  Mysql必知必会第22章 使用视图
 
 ## 39 针对上面的salaries表emp_no字段创建索引idx_emp_no
 
@@ -592,6 +594,8 @@ SELECT * FROM salaries INDEXED BY idx_emp_no WHERE emp_no = 10005;
 ```
 
 ##### Note
+
+题目这里已经默认给创建好索引了，如果再创建会出错
 
 通常来说，优化器会自动选择合适的索引，如果要强制使用某个索引的话如下所示
 
@@ -644,13 +648,12 @@ DELIMITER ;
 2. 补充知识见如下链接：
    - https://www.cnblogs.com/geaozhang/p/6819648.html
    - https://blog.csdn.net/zhangai8351205/article/details/84144361
-
 3. Mysql中的变量：https://www.cnblogs.com/Brambling/p/9259375.html
-4. 通常begin-end用于定义一组语句块，在各大数据库中的客户端工具中可直接调用，但在mysql中不可。见如下链接：
+4. 通常begin-end用于定义一组语句块，其中可以可以包含多条SQL语句，在各大数据库中的客户端工具中可直接调用，但在mysql中不可（需要更改结束符）。见如下链接：
    - https://www.cnblogs.com/oDoraemon/p/5881885.html
    - https://blog.csdn.net/yuxin6866/article/details/52722913
-
 5. 在sqlite中，触发器中必须使用BEGIN-END语句块，但MYSQL中不必须，如果非要使用，需要先更改结束符。
+6. FOR EACH ROW 是对于每一个相应变动行执行操作，即对于第一行执行下面的操作，对于第二行执行下面的操作，依次下去直到最后
 
 ## 42 删除emp_no重复的记录，只保留最小的id对应的记录。
 
