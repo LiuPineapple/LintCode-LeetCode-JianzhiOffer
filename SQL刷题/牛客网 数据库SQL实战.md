@@ -670,7 +670,9 @@ UPDATE titles_test SET to_date = NULL,from_date = '2001-01-01' WHERE to_date = '
 
 ##### Note
 
-update 并非要全列更新，哪一列更新写哪一列，中间用逗号连接。
+1. update 并非要全列更新，哪一列更新写哪一列，中间用逗号连接。
+2. 空值的赋值也要用=，毕竟也没有其他赋值符号
+3. INSERT INTO VALUES ON DUPLICATE UPDATE后面不用加SET直接什么=什么,什么=什么,...
 
 ## 44 将id=5以及emp_no=10001的行数据替换成id=5以及emp_no=10005
 
@@ -683,6 +685,7 @@ REPLACE INTO titles_test SELECT 5,10005,title,from_date,to_date FROM titles_test
 1. 如果用SELECT语句填充值的话就不需要VALUES
 2. REPLACE INTO 的用法见：https://www.cnblogs.com/zxf100/p/10882138.html
 3. REPLACE INTO判断的是PRIMARY或UNIQUE，两者只要有一个重复就执行删除再插入操作，在插入的记录在之前所有记录的最后。由于相当于插入新的行，所以REPLACE INTO后面各个列的值都要齐全（考虑自增和默认值），要类似INSERT INTO 一样。
+4. 集合操作这里要每一列都相同才算重复行，REPLACE INTO 等操作那里只要主键列和唯一约束列相同就算重复记录。其实想想也很容易理解
 
 ## 45 将titles_test表名修改为titles_2017
 
@@ -719,7 +722,7 @@ CREATE TABLE audit(
 在MySQL中：
 
 ```sql
-ALTER TABLE audit ADD CONSTRAINT fk_EMP_NO FOREIGN KEY(EMP_no) REFERENCES employees_test(ID));
+ALTER TABLE audit ADD CONSTRAINT fk_EMP_NO FOREIGN KEY(EMP_no) REFERENCES employees_test(ID);
 ```
 
 ##### Note
@@ -734,12 +737,12 @@ SELECT * FROM employees INTERSECT SELECT * FROM emp_v;
 
 ##### Note
 
-SQL中的集合操作见SQL学习指南第6章，使用集合
+SQL中的集合操作见SQL学习指南第6章 使用集合，Mysql必知必会第17章 组合查询
 
 ## 48 将所有获取奖金的员工当前的薪水增加10%
 
 ```sql
-UPDATE salaries SET salary = salary*1.1 WHERE emp_no IN (SELECT emp_no FROM emp_bonus);
+UPDATE salaries SET salary = 1.1*salary WHERE to_date = '9999-01-01' AND emp_no IN(SELECT DISTINCT emp_no FROM emp_bonus);
 ```
 
 ##### Note
