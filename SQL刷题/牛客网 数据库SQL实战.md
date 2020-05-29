@@ -176,21 +176,27 @@ GROUP BY d.dept_no;
 
 2. 如果是COUNT(),SUM(),AVG()那么聚合函数之前只能跟聚合后值唯一的列，但如果是MAX(),MIN()那么聚合函数之前也可以跟其他列，结果就是最大/最小对应的那一行
 
-3. GROUP BY 后面不一定要跟表中的列，也可以其他比如IF/SUBSTRING之类的函数或CASE WHEN END新建的列
-
 4. SQL语句的书写顺序是SELECT...FROM...[JOIN...ON...]WHERE...GROUP BY...HAVING...ORDER BY...LIMIT
 
    执行顺序是:
 
    - 先把表拼在一起 FROM...[JOIN...ON...]
+   
    - 再筛选 WHERE...
+   
    - 再聚合 GROUP BY...
+   
    - 对分组聚合结果进行筛选HAVING...
+   
    - 再选列 SELECT... 
+   
    - 排序 ORDER BY...
+   
    - 分页输出 LIMIT
-
-​         每一步都是在上一步执行后形成的表中进行操作。其中需要注意的是，HAVING 筛选的时候本来后面只能跟分组列和聚合函数列，但后来兼容了，可以用SELECT里面的列名/别名（但很多书中都不用，因为不规范），比如SELECT里面给聚合函数列起了别名，HAVING就可以拿来用。
+   
+     每一步都是在上一步执行后形成的表中进行操作。其中需要注意的是，HAVING 筛选的时候本来后面只能跟分组列和聚合函数列，但后来兼容了，可以用SELECT里面的列名/别名（但很多书中都不用，因为不规范），比如SELECT里面给聚合函数列起了别名，HAVING就可以拿来用。
+   
+4. GROUP BY,ORDER BY虽然是在上一步的表的基础进行操作的，但后面不一定要跟上一步表中的列，也可以跟对上一步表中的列的处理。GROUP BY 后面不一定要跟表中的列，也可以对表中列的处理（比如IF/SUBSTRING之类的函数或CASE WHEN END新建的列）。ORDER BY 后面不光可以跟SELECT后面的列，还可以跟SELECT后面的列的处理（比如SUBSTRING函数啥的）
 
 ## 13 从titles表获取按照title进行分组
 
@@ -808,6 +814,8 @@ SELECT first_name FROM employees ORDER BY SUBSTR(first_name,-2,2);
 
 3. Python无论是表还是序列都是从0开始的，Excel无论是表还是序列都是从1开始的，当前时间是0，SQL的表索引是从0开始的，序列是从1开始的。负数索引这三个都一样
 
+4. ORDER BY 后面不光可以跟SELECT后面的列，还可以跟SELECT后面的列的处理
+
 ## 53 按照dept_no进行汇总
 
 在本题的SQLite中
@@ -836,11 +844,17 @@ SELECT AVG(salary) avg_salary FROM salaries WHERE to_date = '9999-01-01' AND sal
 AND (SELECT salary FROM salaries ORDER BY salary DESC LIMIT 1,1);
 ```
 
+这里应该是默认了表中最大值最小值都是唯一的
+
 ## 55 分页查询employees表，每5行一页，返回第2页的数据
 
 ```sql
 SELECT * FROM employees LIMIT (2-1)*5,5;
 ```
+
+##### Note
+
+从哪个位置开始，进行多少项，无论是函数(比如SUBSTRING,INSERT)还是分页查询，都是包含最初的位置的
 
 ## 56 获取所有员工的emp_no
 
@@ -848,6 +862,8 @@ SELECT * FROM employees LIMIT (2-1)*5,5;
 SELECT e.emp_no,e.dept_no,b.btype,b.recevied 
 FROM dept_emp e LEFT JOIN emp_bonus b ON e.emp_no = b.emp_no;
 ```
+
+OUTER可以省略
 
 ## 57 使用含有关键字exists查找未分配具体部门的员工的所有信息。
 
@@ -888,7 +904,7 @@ INNER JOIN salaries s ON e.emp_no = s.emp_no AND s.to_date = '9999-01-01';
 ##### Note
 
 1. SQL中CASE语句的使用：见 SQL学习指南第11章  条件逻辑
-2. CASE语句后面一定要有END，触发器在sqlite中一定要有BEGIN,END而且不用改结束符，在Mysql中可以没有BEGIN,END，如果要有的话，需要在语句最前面更改结束符DELIMITER，在语句最后面改回来
+2. CASE语句后面一定要有END，END后面不加结束符，WHEN之间不用加逗号，一般会在END后面加别名，触发器在sqlite中一定要有BEGIN,END而且不用改结束符，在Mysql中可以没有BEGIN,END，如果要有的话，需要在语句最前面更改结束符DELIMITER，在语句最后面改回来
 
 ## 60 统计salary的累计和running_total
 
@@ -902,6 +918,7 @@ running_total FROM salaries s1 WHERE s1.to_date = '9999-01-01';
 
 1. 题干叙述有误，running_total应该是所有小于等于的累加
 2. 本题考查关联子查询
+3. 关联子查询的执行顺序是对于上一步结果表的每一个候选行执行一次，如果出现在WHERE中就是对于FROM后面的表中的每一行查询一次，如果出现在SELECT中，就是对于筛选后的表每行执行一次。
 
 ## 61 对于employees表中，给出奇数行的first_name
 
@@ -912,4 +929,11 @@ SELECT e1.first_name FROM employees e1 WHERE (SELECT COUNT(*) FROM employees e2
 
 ##### Note
 
-题干叙述有误,正确的题目应该是对于employees表，在对first_name进行排名后，选出奇数排名对应的first_name
+1. 题干叙述有误,正确的题目应该是对于employees表，在对first_name进行排名后，选出奇数排名对应的first_name
+2. 在Mysql中，上面代码也正确，但也可以使用下面的MOD(number1,number2)，求第一个数除以第二个数的余数
+
+```sql
+SELECT e1.first_name FROM employees e1 WHERE 
+MOD((SELECT COUNT(*) FROM employees e2 WHERE e1.first_name>=e2.first_name),2) =1;
+```
+
