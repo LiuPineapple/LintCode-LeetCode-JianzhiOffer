@@ -8,6 +8,10 @@ WHERE hire_date=
 (SELECT MAX(hire_date) FROM employees);
 ```
 
+```sql
+SELECT * FROM employees ORDER BY hire_date DESC LIMIT 1;
+```
+
 ##### Note
 
 1. 做SQL题，先有清晰完整思路，再去写代码
@@ -39,8 +43,7 @@ AND d.to_date = '9999-01-01' AND s.to_date = '9999-01-01';
 -- 使用连接查询
 SELECT s.emp_no,s.salary,s.from_date,s.to_date,d.dept_no
 FROM salaries s INNER JOIN dept_manager d
-ON d.emp_no = s.emp_no
-WHERE d.to_date = '9999-01-01' AND s.to_date = '9999-01-01';
+ON d.emp_no = s.emp_no AND d.to_date = '9999-01-01' AND s.to_date = '9999-01-01';
 ```
 
 ```sql
@@ -88,7 +91,7 @@ ORDER BY e.emp_no DESC;
 
 ##### Note
 
-对于e.emp_no这一列，列名就是emp_no,如果不加别名在客户机上看到的就是emp_no，加别名则显示别名。但是在代码中的时候，为了不产生歧义，必须使用完全限定列名。即可能产生歧义的列名，在SQL代码中一律使用完全限定列名
+对于e.emp_no这一列，列名就是emp_no,如果不加别名在客户机上看到的就是emp_no，加别名则显示别名。即客户机上看到的永远是别名/非完全限定列名。但是在代码中的时候，为了不产生歧义，必须使用完全限定列名。即可能产生歧义的列名，在SQL代码中一律使用完全限定列名
 
 ## 7 查找薪水涨幅超过15次的员工号emp_no以及其对应的涨幅次数t
 
