@@ -168,9 +168,42 @@ AND e.emp_no <> m.emp_no;
 ## 12 获取所有部门中当前员工薪水最高的相关信息
 
 ```sql
-SELECT d.dept_no,s.emp_no,MAX(s.salary) salary FROM dept_emp d INNER JOIN salaries s 
-ON d.emp_no = s.emp_no AND d.to_date='9999-01-01' AND s.to_date='9999-01-01'
-GROUP BY d.dept_no;
+-- 正确答案1，非关联子查询
+SELECT a.dept_no,b.emp_no,a.maxSalary
+FROM
+(SELECT d.dept_no,MAX(s.salary) AS maxSalary
+FROM dept_emp d INNER JOIN salaries s
+ON d.emp_no = s.emp_no AND d.to_date = "9999-01-01" AND s.to_date = "9999-01-01"
+GROUP BY d.dept_no) a
+LEFT JOIN
+(SELECT d.dept_no,d.emp_no,s.salary
+FROM dept_emp d INNER JOIN salaries s
+ON d.emp_no = s.emp_no AND d.to_date = "9999-01-01" AND s.to_date = "9999-01-01") b
+ON a.dept_no = b.dept_no AND a.maxSalary = b.salary
+ORDER BY a.dept_no;
+```
+
+```sql
+-- 正确答案2，关联子查询
+SELECT  de.dept_no
+       ,de.emp_no
+       ,s.salary
+FROM dept_emp de
+INNER JOIN salaries s
+ON de.emp_no = s.emp_no AND de.to_date = '9999-01-01' AND s.to_date = '9999-01-01'
+WHERE s.salary = ( 
+SELECT  MAX(s2.salary)
+FROM dept_emp de2
+INNER JOIN salaries s2
+ON de2.emp_no = s2.emp_no AND de2.to_date = '9999-01-01' AND s2.to_date = '9999-01-01'
+WHERE de2.dept_no = de.dept_no 
+GROUP BY  de2.dept_no)
+ORDER BY de.dept_no
+```
+
+```sql
+-- 正确答案3，窗口函数
+
 ```
 
 ##### Note
@@ -200,6 +233,20 @@ GROUP BY d.dept_no;
      每一步都是在上一步执行后形成的表中进行操作。其中需要注意的是，HAVING 筛选的时候本来后面只能跟分组列和聚合函数列，但后来兼容了，可以用SELECT里面的列名/别名（但很多书中都不用，因为不规范），比如SELECT里面给聚合函数列起了别名，HAVING就可以拿来用。
    
 4. GROUP BY,ORDER BY虽然是在上一步的表的基础进行操作的，但后面不一定要跟上一步表中的列，也可以跟对上一步表中的列的处理。GROUP BY 后面不一定要跟表中的列，也可以对表中列的处理（比如IF/SUBSTRING之类的函数或CASE WHEN END新建的列）。ORDER BY 后面不光可以跟SELECT后面的列，还可以跟SELECT后面的列的处理（比如SUBSTRING函数啥的）
+
+5. 在正确答案1当中，子查询先于包含语句执行，相同优先级的子查询从左到右执行，因此先执行第一个子查询接着第二个，在每一个子查询执行时都不会产生歧义，因此两个子查询当中可以用相同的别名。
+
+```sql
+-- 典型错误答案
+SELECT d.dept_no,s.emp_no,MAX(s.salary) salary FROM dept_emp d INNER JOIN salaries s 
+ON d.emp_no = s.emp_no AND d.to_date='9999-01-01' AND s.to_date='9999-01-01'
+GROUP BY d.dept_no;
+```
+
+##### Note
+
+1. 使用group by子句时，select中只能有聚合键、聚合函数、常数、聚合之后唯一的列，保险起见，最后只用前三者。
+2. emp_no并不符合这个要求，所以其值是在这个分组中随机选一个返回的，或者默认取分组中的第一个。所以有时候运行可以得到max(salary)对应的emp_no，有时得不到，全看运气，但就算恰好蒙对了，也不代表这个语法是正确的。
 
 ## 13 从titles表获取按照title进行分组
 
