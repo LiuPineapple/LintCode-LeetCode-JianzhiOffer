@@ -203,7 +203,21 @@ ORDER BY de.dept_no
 
 ```sql
 -- 正确答案3，窗口函数
-
+SELECT  a.dept_no
+       ,a.emp_no
+       ,a.salary AS maxSalary
+FROM 
+(
+	SELECT  d.dept_no
+	       ,d.emp_no
+	       ,s.salary
+	       ,ROW_NUMBER() OVER(PARTITION BY d.dept_no ORDER BY s.salary DESC) AS ranking
+	FROM dept_emp d
+	INNER JOIN salaries s
+	ON d.emp_no = s.emp_no AND d.to_date = "9999-01-01" AND s.to_date = "9999-01-01"
+) a
+WHERE a.ranking = 1
+ORDER BY a.dept_no;
 ```
 
 ##### Note
@@ -232,9 +246,11 @@ ORDER BY de.dept_no
    
      每一步都是在上一步执行后形成的表中进行操作。其中需要注意的是，HAVING 筛选的时候本来后面只能跟分组列和聚合函数列，但后来兼容了，可以用SELECT里面的列名/别名（但很多书中都不用，因为不规范），比如SELECT里面给聚合函数列起了别名，HAVING就可以拿来用。
    
-4. GROUP BY,ORDER BY虽然是在上一步的表的基础进行操作的，但后面不一定要跟上一步表中的列，也可以跟对上一步表中的列的处理。GROUP BY 后面不一定要跟表中的列，也可以对表中列的处理（比如IF/SUBSTRING之类的函数或CASE WHEN END新建的列）。ORDER BY 后面不光可以跟SELECT后面的列，还可以跟SELECT后面的列的处理（比如SUBSTRING函数啥的）
+4. GROUP BY,ORDER BY虽然是在上一步的表的基础进行操作的，但后面不一定要跟上一步表中的列，也可以跟对上一步表中的列的处理，可以理解为对上一步表中的列进行处理产生新列，然后对新列进行GROUP或者ORDER，。GROUP BY 后面不一定要跟表中的列，也可以对表中列的处理（比如IF/SUBSTRING之类的函数或CASE WHEN END新建的列）。ORDER BY 后面不光可以跟SELECT后面的列，还可以跟SELECT后面的列的处理（比如SUBSTRING函数啥的）
 
 5. 在正确答案1当中，子查询先于包含语句执行，相同优先级的子查询从左到右执行，因此先执行第一个子查询接着第二个，在每一个子查询执行时都不会产生歧义，因此两个子查询当中可以用相同的别名。
+
+6. 在正确答案3当中，如果别名变成rank/row_number/dense_rank，会报错，推测可能是占用保留字导致。
 
 ```sql
 -- 典型错误答案
