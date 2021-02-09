@@ -261,7 +261,7 @@ GROUP BY d.dept_no;
 
 ##### Note
 
-1. 使用group by子句时，select中只能有聚合键、聚合函数、常数、聚合之后唯一的列，保险起见，最后只用前三者。
+1. 使用GROUP BY子句时，select中只能有聚合键、聚合函数、常数。，如果有其他列，会默认显式为本组第一行记录对应的值，如果没有GROUP BY 直接聚合，会默认显式这个表中第一行记录对应的值。从这个角度讲，如果SELECT后面跟非聚合键，但是是聚合之后在组中值唯一的列，最后显示的结果也是正确的，因为在组中值唯一，因此取组中第一行也没问题。
 2. emp_no并不符合这个要求，所以其值是在这个分组中随机选一个返回的，或者默认取分组中的第一个。所以有时候运行可以得到max(salary)对应的emp_no，有时得不到，全看运气，但就算恰好蒙对了，也不代表这个语法是正确的。
 
 ## 13 从titles表获取按照title进行分组
@@ -303,6 +303,7 @@ GROUP BY title;
 ## 17 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary
 
 ```sql
+-- 典型错误答案，见12题解释
 SELECT emp_no,MAX(salary) salary FROM salaries
 WHERE salary<(SELECT MAX(salary) FROM salaries WHERE to_date='9999-01-01') 
 AND to_date='9999-01-01';
@@ -322,6 +323,25 @@ SELECT emp_no,salary FROM salaries WHERE to_date = '9999-01-01' AND salary =
 ## 18 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary，不准使用order by
 
 ```sql
+-- 不使用窗口函数
+SELECT  e.emp_no
+       ,s.salary
+       ,e.last_name
+       ,e.first_name
+FROM employees e
+INNER JOIN salaries s
+ON e.emp_no = s.emp_no
+WHERE s.salary = ( 
+SELECT  MAX(salary) salary
+FROM salaries
+WHERE salary<( 
+SELECT  MAX(salary)
+FROM salaries
+WHERE to_date='9999-01-01') AND to_date='9999-01-01');  
+```
+
+```sql
+-- 典型错误答案，见12题解释
 SELECT e.emp_no,MAX(s.salary) salary,e.last_name,e.first_name 
 FROM employees e INNER JOIN salaries s
 ON e.emp_no=s.emp_no AND s.to_date = '9999-01-01'
@@ -341,6 +361,8 @@ LEFT OUTER JOIN departments dp on d.dept_no = dp.dept_no;
 第一次左联结的结果中，dept_no这一列有很多NULL
 
 第二次也要使用左联结，departments表对于NULL值无法匹配，所以会保留一行，右表值全部为NULL，结果没问题
+
+ON和WHERE一样，只有当返回TRUE的时候才代表匹配成功。而对于=运算符来说，左右两边任意一个为NULL，就会返回NULL，匹配失败，如果第二个联结使用INNER JOIN，那么这一行就会被过滤掉。
 
 ## 20 查找员工编号emp_no为10001其自入职以来的薪水salary涨幅值growth
 
