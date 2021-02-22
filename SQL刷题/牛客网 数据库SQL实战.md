@@ -323,7 +323,7 @@ SELECT emp_no,salary FROM salaries WHERE to_date = '9999-01-01' AND salary =
 ## 18 获取当前薪水第二多的员工的emp_no以及其对应的薪水salary，不准使用order by
 
 ```sql
--- 不使用窗口函数
+-- 不使用窗口函数，因为不准使用ORDER BY
 SELECT  e.emp_no
        ,s.salary
        ,e.last_name
@@ -396,8 +396,8 @@ ON start.emp_no = current.emp_no ORDER BY growth;
 
 1. 见Mysql必知必会第10章，计算字段
 2. 给算术计算字段加别名时，算术运算不用加括号
-
 2. 不要害怕复杂，当思考后觉得简单的无法完成题目要求就大胆上复杂的，不要耽误时间
+4. 因为两个子查询独立进行不会产生歧义，因此可以在子查询内部用相同的别名
 
 ---
 
@@ -419,9 +419,8 @@ departments dep ON dem.dept_no = dep.dept_no GROUP BY dem.dept_no;
 
 ##### Note
 
-可以将子查询的结果作为连接表，也可以对三个表进行连接
-
-见SQL学习指南第5章 多表查询
+1. 可以将子查询的结果作为连接表，也可以对三个表进行连接，见SQL学习指南第5章 多表查询
+2. 将非分组列和非聚合列放在SELECT中会在组中随机选一个赋值（一般是第一个），如果这个列在分组后值唯一，就没问题。
 
 ---
 
@@ -449,6 +448,17 @@ WHERE s1.to_date = '9999-01-01'  AND s2.to_date = '9999-01-01' AND s1.salary <= 
 GROUP BY s1.emp_no
 ORDER BY s1.salary DESC, s1.emp_no ASC;
 ```
+
+```sql
+-- 一个容易犯的错误
+SELECT  emp_no
+       ,salary
+       ,DENSE_RANK() OVER(ORDER BY salary DESC,emp_no) AS t_rank
+FROM salaries s
+WHERE to_date = '9999-01-01'; 
+```
+
+这里出错的原因是，答案想要的结果是如果两个员工salary相等，排名就相等，但是emp_no小的排在前面，但如果这样写sql，salary相同的员工排名并不相等，因为还有emp_no排名，所以在排序窗口函数看来并不是并列的了。
 
 ## 24 获取所有非manager员工当前的薪水情况
 
